@@ -163,7 +163,7 @@ class _SmsSenderPageState extends State<SmsSenderPage> {
                           controller: _numberController,
                           label: 'Recipient Number',
                           icon: Icons.phone_iphone_rounded,
-                          hint: '+1 234 567 890',
+                          hint: '+20 123 567 890',
                         ),
                         const SizedBox(height: 24),
                         _buildTextField(
@@ -203,7 +203,7 @@ class _SmsSenderPageState extends State<SmsSenderPage> {
                         borderRadius: BorderRadius.circular(20),
                         child: const Center(
                           child: Text(
-                            'Send Securely',
+                            'Send SMS Message Now',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -227,7 +227,7 @@ class _SmsSenderPageState extends State<SmsSenderPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 300),
                 ],
               ),
             ),
