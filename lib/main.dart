@@ -46,42 +46,31 @@ class _SmsSenderPageState extends State<SmsSenderPage> {
       return;
     }
 
+    // Android requires explicit permission for background SMS
     if (Theme.of(context).platform == TargetPlatform.android) {
-      // Android: Direct background SMS
       final status = await Permission.sms.request();
-      if (status.isGranted) {
-        try {
-          final result = await _channel.invokeMethod('sendSms', {
-            'phone': number,
-            'message': message,
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result.toString())),
-          );
-        } on PlatformException catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${e.message}')),
-          );
-        }
-      } else {
+      if (!status.isGranted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('SMS Permission Denied')),
         );
+        return;
       }
-    } else {
-      // iOS/Other: Fallback to Composer (Direct background SMS is restricted by Apple)
-      final Uri smsUri = Uri(
-        scheme: 'sms',
-        path: number,
-        queryParameters: <String, String>{'body': message},
+    }
+
+    // iOS does not allow background SMS; it will open the native composer.
+    // Android will send it in the background as implemented in MainActivity.kt.
+    try {
+      final result = await _channel.invokeMethod('sendSms', {
+        'phone': number,
+        'message': message,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.toString())),
       );
-      if (await canLaunchUrl(smsUri)) {
-        await launchUrl(smsUri);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch SMS app')),
-        );
-      }
+    } on PlatformException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.message}')),
+      );
     }
   }
 
