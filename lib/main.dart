@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:ui';
 
 void main() {
   runApp(const MyApp());
@@ -15,8 +18,12 @@ class MyApp extends StatelessWidget {
       title: 'SMS Sender',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6366F1),
+          brightness: Brightness.dark,
+        ),
+        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
       ),
       home: const SmsSenderPage(),
     );
@@ -40,38 +47,47 @@ class _SmsSenderPageState extends State<SmsSenderPage> {
     final String message = _messageController.text;
 
     if (number.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a phone number')),
-      );
+      _showError('Please enter a phone number');
       return;
     }
 
-    // Android requires explicit permission for background SMS
     if (Theme.of(context).platform == TargetPlatform.android) {
       final status = await Permission.sms.request();
       if (!status.isGranted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('SMS Permission Denied')),
-        );
+        _showError('SMS Permission Denied');
         return;
       }
     }
 
-    // iOS does not allow background SMS; it will open the native composer.
-    // Android will send it in the background as implemented in MainActivity.kt.
     try {
       final result = await _channel.invokeMethod('sendSms', {
         'phone': number,
         'message': message,
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.toString())),
-      );
+      _showSuccess(result.toString());
     } on PlatformException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
-      );
+      _showError(e.message ?? 'Unknown error');
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -84,112 +100,214 @@ class _SmsSenderPageState extends State<SmsSenderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('Native SMS Sender', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.deepPurple.shade900,
-              Colors.deepPurple.shade500,
-              Colors.blue.shade900,
-            ],
+      backgroundColor: const Color(0xFF0F172A),
+      body: Stack(
+        children: [
+          // Background Shapes
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF6366F1).withOpacity(0.15),
+              ),
+            ).animate().fadeIn(duration: 800.ms).scale(begin: const Offset(0.5, 0.5)),
           ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Icon(
-                  Icons.message_rounded,
-                  size: 80,
-                  color: Colors.white70,
-                ),
-                const SizedBox(height: 32),
-                _buildCard(
-                  child: TextField(
-                    controller: _numberController,
-                    keyboardType: TextInputType.phone,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      labelText: 'Phone Number',
-                      labelStyle: const TextStyle(color: Colors.white70),
-                      hintText: '+1234567890',
-                      hintStyle: const TextStyle(color: Colors.white38),
-                      prefixIcon: const Icon(Icons.phone, color: Colors.white70),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white.withOpacity(0.1),
+          Positioned(
+            bottom: -50,
+            left: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFEC4899).withOpacity(0.1),
+              ),
+            ).animate().fadeIn(duration: 1000.ms).scale(begin: const Offset(0.8, 0.8)),
+          ),
+
+          // Scrollable Content
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 40),
+                  Text(
+                    'Direct SMS',
+                    style: GoogleFonts.outfit(
+                      fontSize: 42,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -1,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: _buildCard(
-                    child: TextField(
-                      controller: _messageController,
-                      maxLines: null,
-                      expands: true,
-                      style: const TextStyle(color: Colors.white),
-                      textAlignVertical: TextAlignVertical.top,
-                      decoration: InputDecoration(
-                        labelText: 'Message',
-                        labelStyle: const TextStyle(color: Colors.white70),
-                        hintText: 'Type your message here...',
-                        hintStyle: const TextStyle(color: Colors.white38),
-                        alignLabelWithHint: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide.none,
+                  ).animate().fadeIn().moveY(begin: 20, end: 0),
+                  Text(
+                    'Connect with anyone, anywhere.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white.withOpacity(0.5),
+                    ),
+                  ).animate().fadeIn(delay: 200.ms).moveY(begin: 10, end: 0),
+                  const SizedBox(height: 48),
+
+                  // Glass Card for Input
+                  _buildGlassCard(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildTextField(
+                          controller: _numberController,
+                          label: 'Recipient Number',
+                          icon: Icons.phone_iphone_rounded,
+                          hint: '+1 234 567 890',
                         ),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
+                        const SizedBox(height: 24),
+                        _buildTextField(
+                          controller: _messageController,
+                          label: 'Message',
+                          icon: Icons.chat_bubble_outline_rounded,
+                          hint: 'Type something meaningful...',
+                          isLongText: true,
+                        ),
+                      ],
+                    ),
+                  ).animate().fadeIn(delay: 400.ms).scale(begin: const Offset(0.95, 0.95)),
+
+                  const SizedBox(height: 32),
+
+                  // Action Button
+                  Container(
+                    width: double.infinity,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6366F1).withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _sendSms,
+                        borderRadius: BorderRadius.circular(20),
+                        child: const Center(
+                          child: Text(
+                            'Send Securely',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ).animate().fadeIn(delay: 600.ms).moveY(begin: 20, end: 0),
+
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Text(
+                      Theme.of(context).platform == TargetPlatform.iOS
+                          ? 'Native composer will open for security'
+                          : 'SMS will be sent in background',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.3),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: _sendSms,
-                  icon: const Icon(Icons.send_rounded),
-                  label: const Text('Send Message', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.deepPurple.shade900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGlassCard({required Widget child}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.1),
+              width: 1.5,
+            ),
+          ),
+          child: child,
         ),
       ),
     );
   }
 
-  Widget _buildCard({required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      padding: const EdgeInsets.all(4),
-      child: child,
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required String hint,
+    bool isLongText = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF6366F1)),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: controller,
+          maxLines: isLongText ? null : 1,
+          style: const TextStyle(fontSize: 16),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.2)),
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.03),
+            contentPadding: const EdgeInsets.all(20),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
