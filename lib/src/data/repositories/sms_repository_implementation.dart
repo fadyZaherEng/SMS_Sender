@@ -22,9 +22,7 @@ class SMSRepositoryImplementation extends SMSRepository {
     required RequestSmsNotification request,
   }) async {
     try {
-      SMSRequest<RequestSmsNotification> smsRequest =
-          SMSRequest<RequestSmsNotification>().createRequest(request);
-      final httpResponse = await _smsApiService.sms(smsRequest);
+      final httpResponse = await _smsApiService.sms(request);
       if (httpResponse.response.statusCode == 200) {
         return DataSuccess(
           data: (httpResponse.data.notifications ?? <RemoteSmsNotification>[])
@@ -46,7 +44,9 @@ class SMSRepositoryImplementation extends SMSRepository {
       }
       return DataFailed(
         error: e,
-        message: "Bad Response",
+        message: e.type == DioExceptionType.connectionError
+            ? "No internet connection"
+            : e.message ?? "Something went wrong",
       );
     }
   }
@@ -74,7 +74,9 @@ class SMSRepositoryImplementation extends SMSRepository {
     } on DioException catch (e) {
       return DataFailed(
         error: e,
-        message: "Bad Response",
+        message: e.type == DioExceptionType.connectionError
+            ? "No internet connection"
+            : e.message ?? "Something went wrong",
       );
     }
   }
@@ -103,7 +105,9 @@ class SMSRepositoryImplementation extends SMSRepository {
     } on DioException catch (e) {
       return DataFailed(
         error: e,
-        message: "Bad Response",
+        message: e.type == DioExceptionType.connectionError
+            ? "No internet connection"
+            : e.message ?? "Something went wrong",
       );
     }
   }

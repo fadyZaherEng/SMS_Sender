@@ -23,12 +23,12 @@ class _SMSAPIService implements SMSAPIService {
 
   @override
   Future<HttpResponse<RemoteSmsNotificationsResponse>> sms(
-      SMSRequest<dynamic> request) async {
+      RequestSmsNotification request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    _data.addAll(request.toJson((value) => value));
+    _data.addAll(request.toJson());
     final _options =
         _setStreamType<HttpResponse<RemoteSmsNotificationsResponse>>(Options(
       method: 'POST',
