@@ -220,7 +220,6 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
                                 SmsSendEvent(
                                   phoneNumber: number,
                                   message: message,
-                                  context: context,
                                   notificationUserId: 0,
                                 ),
                               );
@@ -326,11 +325,28 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
 
     _isSendingBulk = true;
     for (var notification in notifications) {
+      final number = notification.destination.trim();
+      final message = notification.body.trim();
+
+      if (number.isEmpty || message.isEmpty) {
+        _showError('Please fill in all fields.');
+        continue;
+      }
+
+      if (!RegExp(r'^\+?\d{7,15}$').hasMatch(number)) {
+        _showError('Please enter a valid phone number.');
+        continue;
+      }
+
+      final status = await Permission.sms.request();
+      if (!status.isGranted) {
+        _showError('SMS permission is required to send messages.');
+        return;
+      }
       _bloc.add(
         SmsSendEvent(
           phoneNumber: notification.destination,
           message: notification.body,
-          context: context,
           notificationUserId: notification.notificationUserId,
         ),
       );
