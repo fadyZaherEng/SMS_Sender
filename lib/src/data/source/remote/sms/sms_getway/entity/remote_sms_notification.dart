@@ -5,15 +5,19 @@ part 'remote_sms_notification.g.dart';
 
 @JsonSerializable()
 class RemoteSmsNotification {
-  final int? NotificationUserId;
-  final String? Destination;
-  final String? Body;
+  @JsonKey(name: 'notificationUserId')
+  final int? notificationUserId;
+  @JsonKey(name: 'destination')
+  final String? destination;
+  @JsonKey(name: 'body')
+  final String? body;
+  @JsonKey(name: 'message')
   final String? message;
 
   const RemoteSmsNotification({
-    this.NotificationUserId,
-    this.Destination,
-    this.Body,
+    this.notificationUserId,
+    this.destination,
+    this.body,
     this.message,
   });
 
@@ -26,9 +30,9 @@ class RemoteSmsNotification {
 extension RemoteSmsNotificationExtension on RemoteSmsNotification? {
   SmsNotification mapToDomain() {
     return SmsNotification(
-      notificationUserId: this?.NotificationUserId ?? 0,
-      destination: this?.Destination ?? '',
-      body: this?.Body ?? '',
+      notificationUserId: this?.notificationUserId ?? 0,
+      destination: this?.destination ?? '',
+      body: this?.body ?? '',
       message: this?.message ?? '',
     );
   }

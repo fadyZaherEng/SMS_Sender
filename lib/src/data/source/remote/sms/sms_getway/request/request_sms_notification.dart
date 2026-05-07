@@ -16,4 +16,9 @@ class RequestSmsNotification {
       _$RequestSmsNotificationFromJson(json);
 
   Map<String, dynamic> toJson() => _$RequestSmsNotificationToJson(this);
+
+  @override
+  toString() {
+    return 'RequestSmsNotification{subscriberId: $subscriberId, compoundId: $compoundId}';
+  }
 }

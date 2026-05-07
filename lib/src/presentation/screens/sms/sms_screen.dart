@@ -32,7 +32,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   void initState() {
     super.initState();
     _fetchNotifications();
-    _fetchTimer = Timer.periodic(const Duration(minutes: 20), (timer) {
+    _fetchTimer = Timer.periodic(const Duration(seconds: 20), (timer) {
       _fetchNotifications();
     });
   }
@@ -57,7 +57,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
         } else if (state is SendSmsLoading) {
           showLoading();
         } else if (state is GetSMSNotificationToSendOtpLoadingState) {
-          showLoading();
+          // showLoading();
         } else if (state is GetSMSNotificationToSendOtpSuccessState) {
           hideLoading();
           _smsNotifications.clear();

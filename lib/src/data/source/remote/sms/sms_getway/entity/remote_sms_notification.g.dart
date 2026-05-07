@@ -9,17 +9,17 @@ part of 'remote_sms_notification.dart';
 RemoteSmsNotification _$RemoteSmsNotificationFromJson(
         Map<String, dynamic> json) =>
     RemoteSmsNotification(
-      NotificationUserId: (json['NotificationUserId'] as num?)?.toInt(),
-      Destination: json['Destination'] as String?,
-      Body: json['Body'] as String?,
+      notificationUserId: (json['notificationUserId'] as num?)?.toInt(),
+      destination: json['destination'] as String?,
+      body: json['body'] as String?,
       message: json['message'] as String?,
     );
 
 Map<String, dynamic> _$RemoteSmsNotificationToJson(
         RemoteSmsNotification instance) =>
     <String, dynamic>{
-      'NotificationUserId': instance.NotificationUserId,
-      'Destination': instance.Destination,
-      'Body': instance.Body,
+      'notificationUserId': instance.notificationUserId,
+      'destination': instance.destination,
+      'body': instance.body,
       'message': instance.message,
     };

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:sms_sender/src/core/resources/data_state.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/entity/remote_message_response.dart';
+import 'package:sms_sender/src/data/source/remote/sms/sms_getway/entity/remote_sms_notifications_response.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/entity/remote_sms_notification.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/bulk_notification_user_state_request.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/notification_user_state_request.dart';
@@ -25,19 +26,24 @@ class SMSRepositoryImplementation extends SMSRepository {
           SMSRequest<RequestSmsNotification>().createRequest(request);
       final httpResponse = await _smsApiService.sms(smsRequest);
       if (httpResponse.response.statusCode == 200) {
-        if ((httpResponse.data.success ?? false) &&
-            (httpResponse.data.statusCode ?? 400) == 200) {
-          return DataSuccess(
-            data: (httpResponse.data.result ?? <RemoteSmsNotification>[])
-                .mapToDomainList(),
-            message: httpResponse.data.responseMessage ?? "",
-          );
-        }
+        return DataSuccess(
+          data: (httpResponse.data.notifications ?? <RemoteSmsNotification>[])
+              .mapToDomainList(),
+          message: httpResponse.data.message ?? "",
+        );
       }
       return DataFailed(
-        message: httpResponse.data.responseMessage ?? "",
+        message: "Failed to fetch notifications",
       );
     } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return DataSuccess(
+          data: const [],
+          message: e.response?.data is Map
+              ? e.response?.data['message']?.toString() ?? "No notifications"
+              : "No notifications",
+        );
+      }
       return DataFailed(
         error: e,
         message: "Bad Response",

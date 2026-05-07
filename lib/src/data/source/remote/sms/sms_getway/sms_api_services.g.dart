@@ -22,7 +22,7 @@ class _SMSAPIService implements SMSAPIService {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<HttpResponse<SMSResponse<List<RemoteSmsNotification>>>> sms(
+  Future<HttpResponse<RemoteSmsNotificationsResponse>> sms(
       SMSRequest<dynamic> request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -30,35 +30,26 @@ class _SMSAPIService implements SMSAPIService {
     final _data = <String, dynamic>{};
     _data.addAll(request.toJson((value) => value));
     final _options =
-        _setStreamType<HttpResponse<SMSResponse<List<RemoteSmsNotification>>>>(
-            Options(
+        _setStreamType<HttpResponse<RemoteSmsNotificationsResponse>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
     )
-                .compose(
-                  _dio.options,
-                  'notification/sms',
-                  queryParameters: queryParameters,
-                  data: _data,
-                )
-                .copyWith(
-                    baseUrl: _combineBaseUrls(
-                  _dio.options.baseUrl,
-                  baseUrl,
-                )));
+            .compose(
+              _dio.options,
+              'notifications/sms',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late SMSResponse<List<RemoteSmsNotification>> _value;
+    late RemoteSmsNotificationsResponse _value;
     try {
-      _value = SMSResponse<List<RemoteSmsNotification>>.fromJson(
-        _result.data!,
-        (json) => json is List<dynamic>
-            ? json
-                .map<RemoteSmsNotification>((i) =>
-                    RemoteSmsNotification.fromJson(i as Map<String, dynamic>))
-                .toList()
-            : List.empty(),
-      );
+      _value = RemoteSmsNotificationsResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;
