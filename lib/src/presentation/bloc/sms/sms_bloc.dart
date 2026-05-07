@@ -65,19 +65,20 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
           'phone': event.phoneNumber,
           'message': event.message,
         });
+        if (result.toString() == "SMS Sent Successfully") {
+          // For demonstration, we assume the SMS is sent successfully
+          await _updateNotificationUserStateUseCase(
+            request: NotificationUserStateRequest(
+              notificationUserId: event.notificationUserId,
+              isSent: true,
+            ),
+          );
 
-        // For demonstration, we assume the SMS is sent successfully
-        await _updateNotificationUserStateUseCase(
-          request: NotificationUserStateRequest(
-            notificationUserId: event.notificationUserId,
-            isSent: true,
-          ),
-        );
-
-        emit(SendSmsSuccess(
-            responseMessage: result.toString().isNotEmpty
-                ? result.toString()
-                : "SMS sent successfully to ${event.phoneNumber}"));
+          emit(SendSmsSuccess(
+              responseMessage: result.toString().isNotEmpty
+                  ? result.toString()
+                  : "SMS sent successfully to ${event.phoneNumber}"));
+        }
       } on PlatformException catch (e) {
         emit(SendSmsFailure(errorMessage: "Failed to send SMS: ${e.message}"));
       }

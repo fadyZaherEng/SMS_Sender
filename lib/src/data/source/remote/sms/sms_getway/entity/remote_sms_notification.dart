@@ -11,15 +11,12 @@ class RemoteSmsNotification {
   final String? destination;
   @JsonKey(name: 'body')
   final String? body;
-  @JsonKey(name: 'message')
-  final String? message;
 
   const RemoteSmsNotification({
     this.notificationUserId,
     this.destination,
     this.body,
-    this.message,
-  });
+   });
 
   factory RemoteSmsNotification.fromJson(Map<String, dynamic> json) =>
       _$RemoteSmsNotificationFromJson(json);
@@ -33,8 +30,7 @@ extension RemoteSmsNotificationExtension on RemoteSmsNotification? {
       notificationUserId: this?.notificationUserId ?? 0,
       destination: this?.destination ?? '',
       body: this?.body ?? '',
-      message: this?.message ?? '',
-    );
+     );
   }
 }
 

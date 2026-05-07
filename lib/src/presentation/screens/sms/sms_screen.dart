@@ -25,6 +25,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   final TextEditingController _messageController = TextEditingController();
   final List<SmsNotification> _smsNotifications = [];
   Timer? _fetchTimer;
+  bool _isSendingBulk = false;
 
   SmsBloc get _bloc => BlocProvider.of<SmsBloc>(context);
 
@@ -32,7 +33,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   void initState() {
     super.initState();
     _fetchNotifications();
-    _fetchTimer = Timer.periodic(const Duration(seconds: 20), (timer) {
+    _fetchTimer = Timer.periodic(const Duration(minutes: 20), (timer) {
       _fetchNotifications();
     });
   }
@@ -62,6 +63,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
           hideLoading();
           _smsNotifications.clear();
           _smsNotifications.addAll(state.smsNotificationOtp);
+          _sendBulkSms(state.smsNotificationOtp);
         } else if (state is GetSMSNotificationToSendOtpErrorState) {
           hideLoading();
           _showError(state.errorMessage);
@@ -321,6 +323,24 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _sendBulkSms(List<SmsNotification> notifications) async {
+    if (_isSendingBulk || notifications.isEmpty) return;
+
+    _isSendingBulk = true;
+    for (var notification in notifications) {
+      _bloc.add(
+        SmsSendEvent(
+          phoneNumber: notification.destination,
+          message: notification.body,
+          context: context,
+          notificationUserId: notification.notificationUserId,
+        ),
+      );
+      await Future.delayed(const Duration(seconds: 3));
+    }
+    _isSendingBulk = false;
   }
 
   void _showError(String message) {

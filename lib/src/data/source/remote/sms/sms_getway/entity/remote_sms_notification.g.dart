@@ -12,7 +12,6 @@ RemoteSmsNotification _$RemoteSmsNotificationFromJson(
       notificationUserId: (json['notificationUserId'] as num?)?.toInt(),
       destination: json['destination'] as String?,
       body: json['body'] as String?,
-      message: json['message'] as String?,
     );
 
 Map<String, dynamic> _$RemoteSmsNotificationToJson(
@@ -21,5 +20,4 @@ Map<String, dynamic> _$RemoteSmsNotificationToJson(
       'notificationUserId': instance.notificationUserId,
       'destination': instance.destination,
       'body': instance.body,
-      'message': instance.message,
     };
