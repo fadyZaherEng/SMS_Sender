@@ -39,6 +39,15 @@ dependencies:
   google_fonts: ^6.3.0
   flutter_animate: ^4.5.2
   permission_handler: ^11.3.1
+  flutter_bloc:
+  bloc:
+  dio:
+  retrofit:
+  get_it:
+  pretty_dio_logger:
+  injector:
+  equatable:
+  chucker_flutter:
 
 dev_dependencies:
   flutter_test:
