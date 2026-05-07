@@ -11,8 +11,8 @@ class RemoteSmsNotificationsResponse {
   final String? message;
 
   const RemoteSmsNotificationsResponse({
-    this.notifications,
-    this.message,
+    this.notifications= const [],
+    this.message= '',
   });
 
   factory RemoteSmsNotificationsResponse.fromJson(Map<String, dynamic> json) =>

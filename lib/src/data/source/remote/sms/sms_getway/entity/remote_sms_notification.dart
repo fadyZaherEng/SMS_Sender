@@ -13,10 +13,10 @@ class RemoteSmsNotification {
   final String? body;
 
   const RemoteSmsNotification({
-    this.notificationUserId,
-    this.destination,
-    this.body,
-   });
+    this.notificationUserId = 0,
+    this.destination = '',
+    this.body = '',
+  });
 
   factory RemoteSmsNotification.fromJson(Map<String, dynamic> json) =>
       _$RemoteSmsNotificationFromJson(json);
@@ -30,7 +30,7 @@ extension RemoteSmsNotificationExtension on RemoteSmsNotification? {
       notificationUserId: this?.notificationUserId ?? 0,
       destination: this?.destination ?? '',
       body: this?.body ?? '',
-     );
+    );
   }
 }
 

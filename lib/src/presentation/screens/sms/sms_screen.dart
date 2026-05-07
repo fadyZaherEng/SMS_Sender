@@ -58,7 +58,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
           hideLoading();
           _smsNotifications.clear();
           _smsNotifications.addAll(state.smsNotificationOtp);
-          _bloc.add(BulkSmsSendEvent(notifications: state.smsNotificationOtp));
+          _bloc.add(BulkSmsSendEvent(notifications: _smsNotifications));
         } else if (state is GetSMSNotificationToSendOtpErrorState) {
           hideLoading();
           _showError(state.errorMessage);

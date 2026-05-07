@@ -40,42 +40,78 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
   static const _channel = MethodChannel('com.example.sms_sender/sms');
 
   Future<void> _onBulkSmsSendEvent(
-      BulkSmsSendEvent event, Emitter<SmsState> emit) async {
+    BulkSmsSendEvent event,
+    Emitter<SmsState> emit,
+  ) async {
     final status = await Permission.sms.request();
+
     if (!status.isGranted) {
       emit(SendSmsFailure(errorMessage: "SMS Permission Denied"));
       return;
     }
 
-    for (var notification in event.notifications) {
-      final phone = notification.destination.trim();
-      final message = notification.body.trim();
-      debugPrint("BULK SENDING: phone: $phone, message: $message");
-      emit(SendSmsLoading());
+    final notifications = event.notifications
+        .where(
+            (n) => n.body.trim().isNotEmpty && n.destination.trim().isNotEmpty)
+        .toList();
+
+    for (var notification in notifications) {
       try {
-        final result = await _channel.invokeMethod('sendSms', {
-          'phone': "+201201749761",
-          'message': message,
-        });
-        debugPrint("BULK SEND RESULT: $result");
+        // 📱 تنظيف الرقم فقط
+        String phone = _convertArabicToEnglish(notification.destination).trim();
+        phone = phone.replaceAll(RegExp(r'[^\d+]'), '');
 
-        // await _updateNotificationUserStateUseCase(
-        //   request: NotificationUserStateRequest(
-        //     notificationUserId: notification.notificationUserId,
-        //     isSent: true,
-        //   ),
-        // );
+        if (phone.startsWith("+201")) {
+          phone = "0${phone.substring(3)}";
+        } else if (phone.startsWith("201")) {
+          phone = "0${phone.substring(2)}";
+        } else if (phone.startsWith("00201")) {
+          phone = "0${phone.substring(5)}";
+        }
 
-        emit(SendSmsSuccess(
-            responseMessage: result.toString().isNotEmpty
-                ? result.toString()
-                : "SMS sent successfully to $phone"));
+        // 🧼 تنظيف بسيط بدون تكسير النص
+        final message = _convertArabicToEnglish(notification.body)
+            .replaceAll('\r', '')
+            .replaceAll('\n', ' ')
+            .replaceAll('\u200B', '')
+            .trim();
+
+        debugPrint("PHONE: $phone");
+        debugPrint("MESSAGE: ${message.substring(13, 23)}");
+
+        emit(SendSmsLoading());
+
+        final result = await _channel.invokeMethod(
+          'sendSms',
+          {
+            'phone': phone,
+            'message': message.substring(13, 23),
+          },
+        ).timeout(
+          const Duration(seconds: 60),
+        );
+
+        if (result == "SMS Sent Successfully") {
+          await _updateNotificationUserStateUseCase(
+            request: NotificationUserStateRequest(
+              notificationUserId: notification.notificationUserId,
+              isSent: true,
+            ),
+          );
+
+          emit(SendSmsSuccess(
+            responseMessage: "Sent to $phone",
+          ));
+        } else {
+          emit(SendSmsFailure(errorMessage: result.toString()));
+        }
       } catch (e) {
-        debugPrint("BULK SEND ERROR: $e");
-        emit(SendSmsFailure(errorMessage: "Failed to send SMS: ${e.toString()}"));
+        emit(SendSmsFailure(
+          errorMessage: "Failed: ${e.toString()}",
+        ));
       }
-      // Wait 3 seconds before next SMS
-      await Future.delayed(const Duration(seconds: 3));
+
+      await Future.delayed(const Duration(seconds: 2));
     }
   }
 
@@ -87,8 +123,31 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
       return;
     }
 
-    final phone = event.phoneNumber.trim();
-    final message = event.message.trim();
+    // تنظيف وتوحيد رقم التليفون
+    String phone = _convertArabicToEnglish(event.phoneNumber).trim();
+    phone = phone.replaceAll(RegExp(r'[^\d+]'), '');
+
+    if (phone.startsWith("+2001")) {
+      phone = "0${phone.substring(4)}";
+    } else if (phone.startsWith("+201")) {
+      phone = "0${phone.substring(3)}";
+    } else if (phone.startsWith("201")) {
+      phone = "0${phone.substring(2)}";
+    } else if (phone.startsWith("00201")) {
+      phone = "0${phone.substring(5)}";
+    }
+
+    // تنظيف الرسالة
+    final message = _convertArabicToEnglish(event.message)
+        .replaceAll(RegExp(r'[\u200B-\u200D\uFEFF]'), '')
+        .replaceAll('\u200E', '')
+        .replaceAll('\u200F', '')
+        .replaceAll('\u00A0', '')
+        .replaceAll('\r', '')
+        .replaceAll('\n', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
     debugPrint("MANUAL SENDING: phone: $phone, message: $message");
     emit(SendSmsLoading());
     try {
@@ -98,20 +157,12 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
           'message': message,
         });
         debugPrint("MANUAL SEND RESULT: $result");
-        // if (result.toString() == "SMS Sent Successfully") {
-        // For demonstration, we assume the SMS is sent successfully
-        await _updateNotificationUserStateUseCase(
-          request: NotificationUserStateRequest(
-            notificationUserId: event.notificationUserId,
-            isSent: true,
-          ),
-        );
-
-        emit(SendSmsSuccess(
-            responseMessage: result.toString().isNotEmpty
-                ? result.toString()
-                : "SMS sent successfully to ${event.phoneNumber}"));
-        // }
+        if (result.toString() == "SMS Sent Successfully") {
+          emit(SendSmsSuccess(
+              responseMessage: result.toString().isNotEmpty
+                  ? result.toString()
+                  : "SMS sent successfully to ${event.phoneNumber}"));
+        }
       } on PlatformException catch (e) {
         emit(SendSmsFailure(errorMessage: "Failed to send SMS: ${e.message}"));
       }
@@ -164,5 +215,15 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
       emit(BulkUpdateNotificationUserStateErrorState(
           errorMessage: result.message ?? ""));
     }
+  }
+
+  String _convertArabicToEnglish(String input) {
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+    for (int i = 0; i < arabic.length; i++) {
+      input = input.replaceAll(arabic[i], english[i]);
+    }
+    return input;
   }
 }
