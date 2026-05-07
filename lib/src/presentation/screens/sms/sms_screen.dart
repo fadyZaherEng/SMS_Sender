@@ -7,7 +7,10 @@ import 'package:sms_sender/src/config/base/widget/base_stateful_widget.dart';
 import 'package:sms_sender/src/domain/entities/sms/sms_notification.dart';
 import 'package:sms_sender/src/presentation/bloc/sms/sms_bloc.dart';
 import 'package:sms_sender/src/presentation/screens/sms/widgets/sms_card_widget.dart';
-
+// {
+// "subscriberId": 1020,
+// "compoundId": 1041
+// }
 class SmsSenderScreen extends BaseStatefulWidget {
   const SmsSenderScreen({super.key});
 
@@ -18,9 +21,9 @@ class SmsSenderScreen extends BaseStatefulWidget {
 class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
-  final List<SmsNotification>_smsNotifications = [];
-  SmsBloc get _bloc => BlocProvider.of<SmsBloc>(context);
+  final List<SmsNotification> _smsNotifications = [];
 
+  SmsBloc get _bloc => BlocProvider.of<SmsBloc>(context);
 
   @override
   Widget baseBuild(BuildContext context) {
@@ -34,13 +37,29 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
           _showSuccess(state.responseMessage);
         } else if (state is SendSmsLoading) {
           showLoading();
-        }else if (state is GetSMSNotificationToSendOtpLoadingState) {
+        } else if (state is GetSMSNotificationToSendOtpLoadingState) {
           showLoading();
         } else if (state is GetSMSNotificationToSendOtpSuccessState) {
           hideLoading();
           _smsNotifications.clear();
           _smsNotifications.addAll(state.smsNotificationOtp);
         } else if (state is GetSMSNotificationToSendOtpErrorState) {
+          hideLoading();
+          _showError(state.errorMessage);
+        } else if (state is UpdateNotificationUserStateLoadingState) {
+          showLoading();
+        } else if (state is UpdateNotificationUserStateSuccessState) {
+          hideLoading();
+          _showSuccess(state.response.message);
+        } else if (state is UpdateNotificationUserStateErrorState) {
+          hideLoading();
+          _showError(state.errorMessage);
+        } else if (state is BulkUpdateNotificationUserStateLoadingState) {
+          showLoading();
+        } else if (state is BulkUpdateNotificationUserStateSuccessState) {
+          hideLoading();
+          _showSuccess(state.response.message);
+        } else if (state is BulkUpdateNotificationUserStateErrorState) {
           hideLoading();
           _showError(state.errorMessage);
         }
@@ -185,6 +204,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
                                   phoneNumber: number,
                                   message: message,
                                   context: context,
+                                  notificationUserId: 0,
                                 ),
                               );
                             },

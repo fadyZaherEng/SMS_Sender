@@ -1,9 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:sms_sender/src/core/resources/data_state.dart';
+import 'package:sms_sender/src/data/source/remote/sms/sms_getway/entity/remote_message_response.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/entity/remote_sms_notification.dart';
+import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/bulk_notification_user_state_request.dart';
+import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/notification_user_state_request.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/request_sms_notification.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/sms_api_services.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_request.dart';
+import 'package:sms_sender/src/domain/entities/sms/message_response.dart';
 import 'package:sms_sender/src/domain/entities/sms/sms_notification.dart';
 import 'package:sms_sender/src/domain/repositories/sms/sms_repository.dart';
 
@@ -26,6 +30,63 @@ class SMSRepositoryImplementation extends SMSRepository {
           return DataSuccess(
             data: (httpResponse.data.result ?? <RemoteSmsNotification>[])
                 .mapToDomainList(),
+            message: httpResponse.data.responseMessage ?? "",
+          );
+        }
+      }
+      return DataFailed(
+        message: httpResponse.data.responseMessage ?? "",
+      );
+    } on DioException catch (e) {
+      return DataFailed(
+        error: e,
+        message: "Bad Response",
+      );
+    }
+  }
+  @override
+  Future<DataState<MessageResponse>> updateNotificationUserState({
+    required NotificationUserStateRequest request,
+  }) async {
+    try {
+      SMSRequest<NotificationUserStateRequest> smsRequest =
+          SMSRequest<NotificationUserStateRequest>().createRequest(request);
+      final httpResponse =
+          await _smsApiService.updateNotificationUserState(smsRequest);
+      if (httpResponse.response.statusCode == 200) {
+        if ((httpResponse.data.success ?? false) &&
+            (httpResponse.data.statusCode ?? 400) == 200) {
+          return DataSuccess(
+            data: httpResponse.data.result.mapToDomain(),
+            message: httpResponse.data.responseMessage ?? "",
+          );
+        }
+      }
+      return DataFailed(
+        message: httpResponse.data.responseMessage ?? "",
+      );
+    } on DioException catch (e) {
+      return DataFailed(
+        error: e,
+        message: "Bad Response",
+      );
+    }
+  }
+
+  @override
+  Future<DataState<MessageResponse>> bulkUpdateNotificationUserState({
+    required BulkNotificationUserStateRequest request,
+  }) async {
+    try {
+      SMSRequest<BulkNotificationUserStateRequest> smsRequest =
+          SMSRequest<BulkNotificationUserStateRequest>().createRequest(request);
+      final httpResponse =
+          await _smsApiService.bulkUpdateNotificationUserState(smsRequest);
+      if (httpResponse.response.statusCode == 200) {
+        if ((httpResponse.data.success ?? false) &&
+            (httpResponse.data.statusCode ?? 400) == 200) {
+          return DataSuccess(
+            data: httpResponse.data.result.mapToDomain(),
             message: httpResponse.data.responseMessage ?? "",
           );
         }

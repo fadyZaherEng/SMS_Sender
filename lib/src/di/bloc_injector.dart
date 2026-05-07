@@ -5,5 +5,7 @@ import 'data_layer_injector.dart';
 Future<void> initializeBlocDependencies() async {
   injector.registerFactory<SmsBloc>(() => SmsBloc(
         injector(),
+        injector(),
+        injector(),
       ));
 }

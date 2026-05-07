@@ -37,3 +37,41 @@ final class GetSMSNotificationToSendOtpErrorState extends SmsState {
     required this.errorMessage,
   });
 }
+
+// UpdateNotificationUserState
+final class UpdateNotificationUserStateLoadingState extends SmsState {}
+
+final class UpdateNotificationUserStateSuccessState extends SmsState {
+  final MessageResponse response;
+
+  UpdateNotificationUserStateSuccessState({
+    required this.response,
+  });
+}
+
+final class UpdateNotificationUserStateErrorState extends SmsState {
+  final String errorMessage;
+
+  UpdateNotificationUserStateErrorState({
+    required this.errorMessage,
+  });
+}
+
+// BulkUpdateNotificationUserState
+final class BulkUpdateNotificationUserStateLoadingState extends SmsState {}
+
+final class BulkUpdateNotificationUserStateSuccessState extends SmsState {
+  final MessageResponse response;
+
+  BulkUpdateNotificationUserStateSuccessState({
+    required this.response,
+  });
+}
+
+final class BulkUpdateNotificationUserStateErrorState extends SmsState {
+  final String errorMessage;
+
+  BulkUpdateNotificationUserStateErrorState({
+    required this.errorMessage,
+  });
+}
