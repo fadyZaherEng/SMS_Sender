@@ -77,7 +77,7 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
             .trim();
 
         debugPrint("PHONE: $phone");
-        debugPrint("MESSAGE: ${message.substring(13, 23)}");
+        debugPrint("MESSAGE: ${message}");
 
         emit(SendSmsLoading());
 
@@ -85,7 +85,7 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
           'sendSms',
           {
             'phone': phone,
-            'message': message.substring(13, 23),
+            'message': message,
           },
         ).timeout(
           const Duration(seconds: 60),
