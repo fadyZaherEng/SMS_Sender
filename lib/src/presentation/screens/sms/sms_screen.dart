@@ -3,57 +3,35 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sms_sender/src/config/base/widget/base_stateful_widget.dart';
 import 'package:sms_sender/src/presentation/bloc/sms/sms_bloc.dart';
 import 'package:sms_sender/src/presentation/screens/sms/widgets/sms_card_widget.dart';
 
-class SmsSenderScreen extends StatefulWidget {
+class SmsSenderScreen extends BaseStatefulWidget {
   const SmsSenderScreen({super.key});
 
   @override
-  State<SmsSenderScreen> createState() => _SmsSenderScreenState();
+  BaseState<SmsSenderScreen> baseCreateState() => _SmsSenderScreenState();
 }
 
-class _SmsSenderScreenState extends State<SmsSenderScreen> {
+class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
   SmsBloc get _bloc => BlocProvider.of<SmsBloc>(context);
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.redAccent,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF10B981),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   @override
-  void dispose() {
-    _numberController.dispose();
-    _messageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget baseBuild(BuildContext context) {
     return BlocConsumer<SmsBloc, SmsState>(
       listener: (context, state) {
         if (state is SendSmsFailure) {
+          hideLoading();
           _showError(state.errorMessage);
         } else if (state is SendSmsSuccess) {
+          hideLoading();
           _showSuccess(state.responseMessage);
+        } else if (state is SendSmsLoading) {
+          showLoading();
         }
       },
       builder: (context, state) {
@@ -293,5 +271,32 @@ class _SmsSenderScreenState extends State<SmsSenderScreen> {
         ),
       ],
     );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _numberController.dispose();
+    _messageController.dispose();
+    super.dispose();
   }
 }
