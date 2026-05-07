@@ -3,14 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sms_sender/src/core/resources/data_state.dart';
+import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/request_sms_notification.dart';
+import 'package:sms_sender/src/domain/entities/sms/sms_notification.dart';
+import 'package:sms_sender/src/domain/usecase/sms/sms_notification_use_case.dart';
 
 part 'sms_event.dart';
 
 part 'sms_state.dart';
 
 class SmsBloc extends Bloc<SmsEvent, SmsState> {
-  SmsBloc() : super(SmsInitial()) {
+  final SmsNotificationUseCase _smsNotificationUseCase;
+
+  SmsBloc(
+    this._smsNotificationUseCase,
+  ) : super(SmsInitial()) {
     on<SmsSendEvent>(_onSmsSendEvent);
+    on<GetSMSNotificationToSendOtp>(_onGetSMSNotificationToSendOtp);
   }
 
   static const _channel = MethodChannel('com.example.sms_sender/sms');
@@ -53,6 +62,23 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
       }
     } catch (e) {
       emit(SendSmsFailure(errorMessage: "Failed to send SMS: ${e.toString()}"));
+    }
+  }
+
+  Future<void> _onGetSMSNotificationToSendOtp(
+      GetSMSNotificationToSendOtp event, Emitter<SmsState> emit) async {
+    emit(GetSMSNotificationToSendOtpLoadingState());
+    final smsNotificationState = await _smsNotificationUseCase(
+        requestSmsNotification: RequestSmsNotification(
+      compoundId: event.compoundId,
+      subscriberId: event.subscriberId,
+    ));
+    if (smsNotificationState is DataSuccess<List<SmsNotification>>) {
+      emit(GetSMSNotificationToSendOtpSuccessState(
+          smsNotificationOtp: smsNotificationState.data ?? []));
+    } else if (smsNotificationState is DataFailed) {
+      emit(GetSMSNotificationToSendOtpErrorState(
+          errorMessage: smsNotificationState.message ?? ""));
     }
   }
 }

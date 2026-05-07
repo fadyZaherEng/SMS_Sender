@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:sms_sender/src/data/source/api_key.dart';
+import 'package:sms_sender/src/data/source/remote/sms/sms_getway/sms_api_services.dart';
 
 final injector = GetIt.instance;
 
@@ -41,5 +42,5 @@ Future<void> initializeDataDependencies() async {
   //
   // injector.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
   //
-  // injector.registerSingleton<LoginAPIService>(LoginAPIService(injector()));
+  injector.registerSingleton<SMSAPIService>(SMSAPIService(injector()));
 }

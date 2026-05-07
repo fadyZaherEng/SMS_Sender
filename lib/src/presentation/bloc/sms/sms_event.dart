@@ -16,3 +16,13 @@ final class SmsSendEvent extends SmsEvent {
     required this.context,
   });
 }
+
+final class GetSMSNotificationToSendOtp extends SmsEvent {
+  final int subscriberId;
+  final int compoundId;
+
+  GetSMSNotificationToSendOtp({
+    required this.compoundId,
+    required this.subscriberId,
+  });
+}

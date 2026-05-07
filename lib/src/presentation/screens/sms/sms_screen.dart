@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sms_sender/src/config/base/widget/base_stateful_widget.dart';
+import 'package:sms_sender/src/domain/entities/sms/sms_notification.dart';
 import 'package:sms_sender/src/presentation/bloc/sms/sms_bloc.dart';
 import 'package:sms_sender/src/presentation/screens/sms/widgets/sms_card_widget.dart';
 
@@ -17,8 +18,9 @@ class SmsSenderScreen extends BaseStatefulWidget {
 class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
-
+  final List<SmsNotification>_smsNotifications = [];
   SmsBloc get _bloc => BlocProvider.of<SmsBloc>(context);
+
 
   @override
   Widget baseBuild(BuildContext context) {
@@ -32,6 +34,15 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
           _showSuccess(state.responseMessage);
         } else if (state is SendSmsLoading) {
           showLoading();
+        }else if (state is GetSMSNotificationToSendOtpLoadingState) {
+          showLoading();
+        } else if (state is GetSMSNotificationToSendOtpSuccessState) {
+          hideLoading();
+          _smsNotifications.clear();
+          _smsNotifications.addAll(state.smsNotificationOtp);
+        } else if (state is GetSMSNotificationToSendOtpErrorState) {
+          hideLoading();
+          _showError(state.errorMessage);
         }
       },
       builder: (context, state) {
