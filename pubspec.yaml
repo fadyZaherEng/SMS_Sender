@@ -45,7 +45,6 @@ dependencies:
   retrofit:
   get_it:
   pretty_dio_logger:
-  injector:
   equatable:
   chucker_flutter:
 
