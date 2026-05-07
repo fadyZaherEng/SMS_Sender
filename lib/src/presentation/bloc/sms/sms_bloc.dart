@@ -30,6 +30,7 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
     this._bulkUpdateNotificationUserStateUseCase,
   ) : super(SmsInitial()) {
     on<SmsSendEvent>(_onSmsSendEvent);
+    on<BulkSmsSendEvent>(_onBulkSmsSendEvent);
     on<GetSMSNotificationToSendOtp>(_onGetSMSNotificationToSendOtp);
     on<UpdateNotificationUserStateEvent>(_onUpdateNotificationUserStateEvent);
     on<BulkUpdateNotificationUserStateEvent>(
@@ -38,15 +39,65 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
 
   static const _channel = MethodChannel('com.example.sms_sender/sms');
 
+  Future<void> _onBulkSmsSendEvent(
+      BulkSmsSendEvent event, Emitter<SmsState> emit) async {
+    final status = await Permission.sms.request();
+    if (!status.isGranted) {
+      emit(SendSmsFailure(errorMessage: "SMS Permission Denied"));
+      return;
+    }
+
+    for (var notification in event.notifications) {
+      final phone = notification.destination.trim();
+      final message = notification.body.trim();
+      debugPrint("BULK SENDING: phone: $phone, message: $message");
+      emit(SendSmsLoading());
+      try {
+        final result = await _channel.invokeMethod('sendSms', {
+          'phone': "+201201749761",
+          'message': message,
+        });
+        debugPrint("BULK SEND RESULT: $result");
+
+        // await _updateNotificationUserStateUseCase(
+        //   request: NotificationUserStateRequest(
+        //     notificationUserId: notification.notificationUserId,
+        //     isSent: true,
+        //   ),
+        // );
+
+        emit(SendSmsSuccess(
+            responseMessage: result.toString().isNotEmpty
+                ? result.toString()
+                : "SMS sent successfully to $phone"));
+      } catch (e) {
+        debugPrint("BULK SEND ERROR: $e");
+        emit(SendSmsFailure(errorMessage: "Failed to send SMS: ${e.toString()}"));
+      }
+      // Wait 3 seconds before next SMS
+      await Future.delayed(const Duration(seconds: 3));
+    }
+  }
+
   Future<void> _onSmsSendEvent(
       SmsSendEvent event, Emitter<SmsState> emit) async {
+    final status = await Permission.sms.request();
+    if (!status.isGranted) {
+      emit(SendSmsFailure(errorMessage: "SMS Permission Denied"));
+      return;
+    }
+
+    final phone = event.phoneNumber.trim();
+    final message = event.message.trim();
+    debugPrint("MANUAL SENDING: phone: $phone, message: $message");
     emit(SendSmsLoading());
     try {
       try {
         final result = await _channel.invokeMethod('sendSms', {
-          'phone': event.phoneNumber,
-          'message': event.message,
+          'phone': phone,
+          'message': message,
         });
+        debugPrint("MANUAL SEND RESULT: $result");
         // if (result.toString() == "SMS Sent Successfully") {
         // For demonstration, we assume the SMS is sent successfully
         await _updateNotificationUserStateUseCase(

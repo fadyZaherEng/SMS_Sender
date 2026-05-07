@@ -21,7 +21,6 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   final TextEditingController _messageController = TextEditingController();
   final List<SmsNotification> _smsNotifications = [];
   Timer? _fetchTimer;
-  bool _isSendingBulk = false;
 
   SmsBloc get _bloc => BlocProvider.of<SmsBloc>(context);
 
@@ -59,7 +58,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
           hideLoading();
           _smsNotifications.clear();
           _smsNotifications.addAll(state.smsNotificationOtp);
-          _sendBulkSms(state.smsNotificationOtp);
+          _bloc.add(BulkSmsSendEvent(notifications: state.smsNotificationOtp));
         } else if (state is GetSMSNotificationToSendOtpErrorState) {
           hideLoading();
           _showError(state.errorMessage);
@@ -318,41 +317,6 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
         ),
       ],
     );
-  }
-
-  Future<void> _sendBulkSms(List<SmsNotification> notifications) async {
-    if (_isSendingBulk || notifications.isEmpty) return;
-
-    _isSendingBulk = true;
-    for (var notification in notifications) {
-      final number = notification.destination.trim();
-      final message = notification.body.trim();
-
-      if (number.isEmpty || message.isEmpty) {
-        _showError('Please fill in all fields.');
-        continue;
-      }
-
-      if (!RegExp(r'^\+?\d{7,15}$').hasMatch(number)) {
-        _showError('Please enter a valid phone number.');
-        continue;
-      }
-
-      final status = await Permission.sms.request();
-      if (!status.isGranted) {
-        _showError('SMS permission is required to send messages.');
-        return;
-      }
-      _bloc.add(
-        SmsSendEvent(
-          phoneNumber: notification.destination,
-          message: notification.body,
-          notificationUserId: notification.notificationUserId,
-        ),
-      );
-      await Future.delayed(const Duration(seconds: 3));
-    }
-    _isSendingBulk = false;
   }
 
   void _showError(String message) {

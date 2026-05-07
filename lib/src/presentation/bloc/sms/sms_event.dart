@@ -27,7 +27,13 @@ final class GetSMSNotificationToSendOtp extends SmsEvent {
   });
 }
 
-final class UpdateNotificationUserStateEvent extends SmsEvent {
+final class BulkSmsSendEvent extends SmsEvent {
+  final List<SmsNotification> notifications;
+
+  BulkSmsSendEvent({required this.notifications});
+}
+
+class UpdateNotificationUserStateEvent extends SmsEvent {
   final NotificationUserStateRequest request;
 
   UpdateNotificationUserStateEvent({
