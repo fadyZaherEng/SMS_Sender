@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +8,7 @@ import 'package:sms_sender/src/config/base/widget/base_stateful_widget.dart';
 import 'package:sms_sender/src/domain/entities/sms/sms_notification.dart';
 import 'package:sms_sender/src/presentation/bloc/sms/sms_bloc.dart';
 import 'package:sms_sender/src/presentation/screens/sms/widgets/sms_card_widget.dart';
+
 // {
 // "subscriberId": 1020,
 // "compoundId": 1041
@@ -22,8 +24,25 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
   final List<SmsNotification> _smsNotifications = [];
+  Timer? _fetchTimer;
 
   SmsBloc get _bloc => BlocProvider.of<SmsBloc>(context);
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotifications();
+    _fetchTimer = Timer.periodic(const Duration(minutes: 20), (timer) {
+      _fetchNotifications();
+    });
+  }
+
+  void _fetchNotifications() {
+    _bloc.add(GetSMSNotificationToSendOtp(
+      compoundId: 1041,
+      subscriberId: 1020,
+    ));
+  }
 
   @override
   Widget baseBuild(BuildContext context) {
@@ -326,6 +345,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
 
   @override
   void dispose() {
+    _fetchTimer?.cancel();
     _numberController.dispose();
     _messageController.dispose();
     super.dispose();
