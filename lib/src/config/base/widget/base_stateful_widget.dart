@@ -5,9 +5,9 @@ abstract class BaseStatefulWidget extends StatefulWidget {
   final Color materialColor;
 
   const BaseStatefulWidget({
-    Key? key,
+    super.key,
     this.materialColor = Colors.white,
-  }) : super(key: key);
+  });
 
   @override
   BaseState createState() {
@@ -19,7 +19,6 @@ abstract class BaseStatefulWidget extends StatefulWidget {
 
 abstract class BaseState<W extends BaseStatefulWidget> extends State<W>
     with LoadingManager {
-  // late StreamSubscription<ConnectivityResult> subscription;
   @override
   Widget build(BuildContext context) {
     return baseWidget();
