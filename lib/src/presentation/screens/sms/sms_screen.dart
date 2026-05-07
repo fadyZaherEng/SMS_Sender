@@ -9,10 +9,6 @@ import 'package:sms_sender/src/domain/entities/sms/sms_notification.dart';
 import 'package:sms_sender/src/presentation/bloc/sms/sms_bloc.dart';
 import 'package:sms_sender/src/presentation/screens/sms/widgets/sms_card_widget.dart';
 
-// {
-// "subscriberId": 1020,
-// "compoundId": 1041
-// }
 class SmsSenderScreen extends BaseStatefulWidget {
   const SmsSenderScreen({super.key});
 
@@ -33,7 +29,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   void initState() {
     super.initState();
     _fetchNotifications();
-    _fetchTimer = Timer.periodic(const Duration(minutes: 20), (timer) {
+    _fetchTimer = Timer.periodic(const Duration(seconds: 20), (timer) {
       _fetchNotifications();
     });
   }
