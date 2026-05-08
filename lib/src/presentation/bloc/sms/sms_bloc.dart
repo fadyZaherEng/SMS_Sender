@@ -58,9 +58,9 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
         final result = await _channel.invokeMethod(
           'sendSms',
           {
-            'phone': notification.destination,
-            // 'message':"Code: ${notification.body}",
-            'message': notification.body,
+            'phone': "+201201749761", // notification.destination,
+            'message'://notification.body,
+                "Verification Code: ${notification.body} .This Code Is Valid For 10 Minutes . Please do not share it with anyone",
           },
         ).timeout(
           const Duration(seconds: 60),
