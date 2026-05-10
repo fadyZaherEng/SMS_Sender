@@ -55,7 +55,7 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
           'sendSms',
           {
             'phone': notification.destination,
-            'message': //notification.body,
+            'message'://notification.body,
                 "Verification Code: ${notification.body} .This Code Is Valid For 10 Minutes . Please do not share it with anyone",
           },
         ).timeout(const Duration(seconds: 60));
