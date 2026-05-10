@@ -18,4 +18,8 @@ class NotificationUserStateRequest {
       _$NotificationUserStateRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$NotificationUserStateRequestToJson(this);
+  @override
+  String toString() {
+    return 'NotificationUserStateRequest{notificationUserId: $notificationUserId, isSent: $isSent}';
+  }
 }
