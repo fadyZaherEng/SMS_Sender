@@ -21,13 +21,11 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
   final SmsNotificationUseCase _smsNotificationUseCase;
   final UpdateNotificationUserStateUseCase _updateNotificationUserStateUseCase;
   final BulkUpdateNotificationUserStateUseCase
-      _bulkUpdateNotificationUserStateUseCase;
+  _bulkUpdateNotificationUserStateUseCase;
 
-  SmsBloc(
-    this._smsNotificationUseCase,
-    this._updateNotificationUserStateUseCase,
-    this._bulkUpdateNotificationUserStateUseCase,
-  ) : super(SmsInitial()) {
+  SmsBloc(this._smsNotificationUseCase,
+      this._updateNotificationUserStateUseCase,
+      this._bulkUpdateNotificationUserStateUseCase,) : super(SmsInitial()) {
     on<SmsSendEvent>(_onSmsSendEvent);
     on<BulkSmsSendEvent>(_onBulkSmsSendEvent);
     on<GetSMSNotificationToSendOtp>(_onGetSMSNotificationToSendOtp);
@@ -38,10 +36,8 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
 
   static const _channel = MethodChannel('com.example.sms_sender/sms');
 
-  Future<void> _onBulkSmsSendEvent(
-    BulkSmsSendEvent event,
-    Emitter<SmsState> emit,
-  ) async {
+  Future<void> _onBulkSmsSendEvent(BulkSmsSendEvent event,
+      Emitter<SmsState> emit,) async {
     final status = await Permission.sms.request();
 
     if (!status.isGranted) {
@@ -58,9 +54,10 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
         final result = await _channel.invokeMethod(
           'sendSms',
           {
-            'phone': "+201201749761", // notification.destination,
-            'message'://notification.body,
-                "Verification Code: ${notification.body} .This Code Is Valid For 10 Minutes . Please do not share it with anyone",
+            'phone': notification.destination,
+            'message': //notification.body,
+            "Verification Code: ${notification
+                .body} .This Code Is Valid For 10 Minutes . Please do not share it with anyone",
           },
         ).timeout(
           const Duration(seconds: 60),
@@ -88,15 +85,16 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
     }
   }
 
-  Future<void> _onSmsSendEvent(
-      SmsSendEvent event, Emitter<SmsState> emit) async {
+  Future<void> _onSmsSendEvent(SmsSendEvent event,
+      Emitter<SmsState> emit) async {
     final status = await Permission.sms.request();
     if (!status.isGranted) {
       emit(SendSmsFailure(errorMessage: "SMS Permission Denied"));
       return;
     }
     debugPrint(
-        "MANUAL SENDING: phone: ${event.phoneNumber}, message: ${event.message}");
+        "MANUAL SENDING: phone: ${event.phoneNumber}, message: ${event
+            .message}");
     emit(SendSmsLoading());
     try {
       try {
@@ -107,7 +105,9 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
         debugPrint("MANUAL SEND RESULT: $result");
         if (result.toString() == "SMS Sent Successfully") {
           emit(SendSmsSuccess(
-              responseMessage: result.toString().isNotEmpty
+              responseMessage: result
+                  .toString()
+                  .isNotEmpty
                   ? result.toString()
                   : "SMS sent successfully to ${event.phoneNumber}"));
         }
@@ -119,14 +119,14 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
     }
   }
 
-  Future<void> _onGetSMSNotificationToSendOtp(
-      GetSMSNotificationToSendOtp event, Emitter<SmsState> emit) async {
+  Future<void> _onGetSMSNotificationToSendOtp(GetSMSNotificationToSendOtp event,
+      Emitter<SmsState> emit) async {
     emit(GetSMSNotificationToSendOtpLoadingState());
     final smsNotificationState = await _smsNotificationUseCase(
         requestSmsNotification: RequestSmsNotification(
-      compoundId: event.compoundId,
-      subscriberId: event.subscriberId,
-    ));
+          compoundId: event.compoundId,
+          subscriberId: event.subscriberId,
+        ));
     if (smsNotificationState is DataSuccess<List<SmsNotification>>) {
       emit(GetSMSNotificationToSendOtpSuccessState(
           smsNotificationOtp: smsNotificationState.data ?? []));
@@ -140,7 +140,7 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
       UpdateNotificationUserStateEvent event, Emitter<SmsState> emit) async {
     emit(UpdateNotificationUserStateLoadingState());
     final result =
-        await _updateNotificationUserStateUseCase(request: event.request);
+    await _updateNotificationUserStateUseCase(request: event.request);
     if (result is DataSuccess<MessageResponse>) {
       emit(UpdateNotificationUserStateSuccessState(
           response: result.data ?? const MessageResponse()));
@@ -155,7 +155,7 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
       Emitter<SmsState> emit) async {
     emit(BulkUpdateNotificationUserStateLoadingState());
     final result =
-        await _bulkUpdateNotificationUserStateUseCase(request: event.request);
+    await _bulkUpdateNotificationUserStateUseCase(request: event.request);
     if (result is DataSuccess<MessageResponse>) {
       emit(BulkUpdateNotificationUserStateSuccessState(
           response: result.data ?? const MessageResponse()));
