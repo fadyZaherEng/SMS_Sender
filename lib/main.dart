@@ -28,6 +28,8 @@ void main() async {
   FlutterNativeSplash.remove();
 }
 
+//use this to make the app run in background and send sms without opening the app
+//flutter_background_service
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
