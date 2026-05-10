@@ -6,8 +6,8 @@ import 'package:sms_sender/src/data/source/remote/sms/sms_getway/entity/remote_s
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/bulk_notification_user_state_request.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/notification_user_state_request.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/request_sms_notification.dart';
-import 'package:sms_sender/src/data/source/remote/sms/sms_request.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_response.dart';
+
 part 'sms_api_services.g.dart';
 
 @RestApi()
@@ -20,11 +20,10 @@ abstract class SMSAPIService {
 
   @POST(APIKeys.smsUserState)
   Future<HttpResponse<SMSResponse<RemoteMessageResponse>>>
-      updateNotificationUserState(
-          @Body() SMSRequest<NotificationUserStateRequest> request);
+      updateNotificationUserState(@Body() NotificationUserStateRequest request);
 
   @POST(APIKeys.smsUserStateBulk)
   Future<HttpResponse<SMSResponse<RemoteMessageResponse>>>
       bulkUpdateNotificationUserState(
-          @Body() SMSRequest<BulkNotificationUserStateRequest> request);
+          @Body() BulkNotificationUserStateRequest request);
 }

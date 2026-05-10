@@ -10,10 +10,11 @@ RemoteSmsNotificationsResponse _$RemoteSmsNotificationsResponseFromJson(
         Map<String, dynamic> json) =>
     RemoteSmsNotificationsResponse(
       notifications: (json['notifications'] as List<dynamic>?)
-          ?.map(
-              (e) => RemoteSmsNotification.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      message: json['message'] as String?,
+              ?.map((e) =>
+                  RemoteSmsNotification.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      message: json['message'] as String? ?? '',
     );
 
 Map<String, dynamic> _$RemoteSmsNotificationsResponseToJson(

@@ -60,13 +60,12 @@ class _SMSAPIService implements SMSAPIService {
 
   @override
   Future<HttpResponse<SMSResponse<RemoteMessageResponse>>>
-      updateNotificationUserState(
-          SMSRequest<NotificationUserStateRequest> request) async {
+      updateNotificationUserState(NotificationUserStateRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    _data.addAll(request.toJson((value) => value.toJson()));
+    _data.addAll(request.toJson());
     final _options =
         _setStreamType<HttpResponse<SMSResponse<RemoteMessageResponse>>>(
             Options(
@@ -103,12 +102,12 @@ class _SMSAPIService implements SMSAPIService {
   @override
   Future<HttpResponse<SMSResponse<RemoteMessageResponse>>>
       bulkUpdateNotificationUserState(
-          SMSRequest<BulkNotificationUserStateRequest> request) async {
+          BulkNotificationUserStateRequest request) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    _data.addAll(request.toJson((value) => value.toJson()));
+    _data.addAll(request.toJson());
     final _options =
         _setStreamType<HttpResponse<SMSResponse<RemoteMessageResponse>>>(
             Options(

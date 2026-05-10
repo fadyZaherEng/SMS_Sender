@@ -54,7 +54,7 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
         final result = await _channel.invokeMethod(
           'sendSms',
           {
-            'phone': notification.destination,
+            'phone':"+201273826361",// notification.destination,
             'message': //notification.body,
             "Verification Code: ${notification
                 .body} .This Code Is Valid For 10 Minutes . Please do not share it with anyone",
@@ -63,7 +63,8 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
           const Duration(seconds: 60)
         );
 
-        // if (result == "SMS Sent Successfully") {
+        if (result == "SMS Sent Successfully") {
+          print("SMS sent successfully to ${notification.notificationUserId}");
           await _updateNotificationUserStateUseCase(
             request: NotificationUserStateRequest(
               notificationUserId: notification.notificationUserId,
@@ -73,9 +74,9 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
           emit(SendSmsSuccess(
             responseMessage: "Sent to ${notification.destination}",
           ));
-        // } else {
-        //   emit(SendSmsFailure(errorMessage: result.toString()));
-        // }
+        } else {
+          emit(SendSmsFailure(errorMessage: result.toString()));
+        }
       } catch (e) {
         emit(SendSmsFailure(
           errorMessage: "Failed: ${e.toString()}",

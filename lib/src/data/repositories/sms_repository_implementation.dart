@@ -55,10 +55,8 @@ class SMSRepositoryImplementation extends SMSRepository {
     required NotificationUserStateRequest request,
   }) async {
     try {
-      SMSRequest<NotificationUserStateRequest> smsRequest =
-          SMSRequest<NotificationUserStateRequest>().createRequest(request);
       final httpResponse =
-          await _smsApiService.updateNotificationUserState(smsRequest);
+          await _smsApiService.updateNotificationUserState(request);
       if (httpResponse.response.statusCode == 200) {
         if ((httpResponse.data.success ?? false) &&
             (httpResponse.data.statusCode ?? 400) == 200) {
@@ -86,10 +84,8 @@ class SMSRepositoryImplementation extends SMSRepository {
     required BulkNotificationUserStateRequest request,
   }) async {
     try {
-      SMSRequest<BulkNotificationUserStateRequest> smsRequest =
-          SMSRequest<BulkNotificationUserStateRequest>().createRequest(request);
       final httpResponse =
-          await _smsApiService.bulkUpdateNotificationUserState(smsRequest);
+          await _smsApiService.bulkUpdateNotificationUserState(request);
       if (httpResponse.response.statusCode == 200) {
         if ((httpResponse.data.success ?? false) &&
             (httpResponse.data.statusCode ?? 400) == 200) {
