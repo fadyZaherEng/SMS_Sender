@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sms_sender/src/core/resources/data_state.dart';
 import 'package:sms_sender/src/data/source/remote/sms/sms_getway/request/bulk_notification_user_state_request.dart';
@@ -43,7 +42,6 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
     Emitter<SmsState> emit,
   ) async {
     final status = await Permission.sms.request();
-
     if (!status.isGranted) {
       emit(SendSmsFailure(errorMessage: "SMS Permission Denied"));
       return;
@@ -71,17 +69,17 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
               isSent: true,
             ),
           );
-          emit(SendSmsSuccess(
-            responseMessage:
-                "Sent to ${notification.destination} successfully, updated notification user state.",
-          ));
+          emit(
+            SendSmsSuccess(
+              responseMessage:
+                  "Sent to ${notification.destination} successfully, updated notification user state.",
+            ),
+          );
         } else {
           emit(SendSmsFailure(errorMessage: result.toString()));
         }
       } catch (e) {
-        emit(SendSmsFailure(
-          errorMessage: "Failed: ${e.toString()}",
-        ));
+        emit(SendSmsFailure(errorMessage: "Failed: ${e.toString()}"));
       }
       await Future.delayed(const Duration(seconds: 2));
     }
@@ -97,16 +95,22 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
     emit(SendSmsLoading());
     try {
       try {
-        final result = await _channel.invokeMethod('sendSms', {
-          'phone': event.phoneNumber,
-          'message': event.message,
-        });
+        final result = await _channel.invokeMethod(
+          'sendSms',
+          {
+            'phone': event.phoneNumber,
+            'message': event.message,
+          },
+        ).timeout(const Duration(seconds: 60));
         debugPrint("MANUAL SEND RESULT: $result");
         if (result.toString() == "SMS Sent Successfully") {
-          emit(SendSmsSuccess(
+          emit(
+            SendSmsSuccess(
               responseMessage: result.toString().isNotEmpty
                   ? result.toString()
-                  : "SMS sent successfully to ${event.phoneNumber}"));
+                  : "SMS sent successfully to ${event.phoneNumber}",
+            ),
+          );
         }
       } on PlatformException catch (e) {
         emit(SendSmsFailure(errorMessage: "Failed to send SMS: ${e.message}"));
@@ -139,11 +143,17 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
     final result =
         await _updateNotificationUserStateUseCase(request: event.request);
     if (result is DataSuccess<MessageResponse>) {
-      emit(UpdateNotificationUserStateSuccessState(
-          response: result.data ?? const MessageResponse()));
+      emit(
+        UpdateNotificationUserStateSuccessState(
+          response: result.data ?? const MessageResponse(),
+        ),
+      );
     } else if (result is DataFailed) {
-      emit(UpdateNotificationUserStateErrorState(
-          errorMessage: result.message ?? ""));
+      emit(
+        UpdateNotificationUserStateErrorState(
+          errorMessage: result.message ?? "",
+        ),
+      );
     }
   }
 
@@ -154,11 +164,17 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
     final result =
         await _bulkUpdateNotificationUserStateUseCase(request: event.request);
     if (result is DataSuccess<MessageResponse>) {
-      emit(BulkUpdateNotificationUserStateSuccessState(
-          response: result.data ?? const MessageResponse()));
+      emit(
+        BulkUpdateNotificationUserStateSuccessState(
+          response: result.data ?? const MessageResponse(),
+        ),
+      );
     } else if (result is DataFailed) {
-      emit(BulkUpdateNotificationUserStateErrorState(
-          errorMessage: result.message ?? ""));
+      emit(
+        BulkUpdateNotificationUserStateErrorState(
+          errorMessage: result.message ?? "",
+        ),
+      );
     }
   }
 }
