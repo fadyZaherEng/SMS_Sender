@@ -28,7 +28,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   void initState() {
     super.initState();
     _fetchNotifications();
-    _fetchTimer = Timer.periodic(const Duration(seconds: 20), (timer) {
+    _fetchTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       _fetchNotifications();
     });
   }
