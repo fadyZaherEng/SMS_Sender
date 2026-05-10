@@ -52,9 +52,7 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
       try {
         debugPrint("PHONE: ${notification.destination}");
         debugPrint("MESSAGE: ${notification.body}");
-
         emit(SendSmsLoading());
-
         final result = await _channel.invokeMethod(
           'sendSms',
           {
@@ -65,7 +63,8 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
         ).timeout(const Duration(seconds: 60));
 
         if (result == "SMS Sent Successfully") {
-          print("SMS sent successfully to ${notification.notificationUserId}");
+          debugPrint(
+              "SMS sent successfully to ${notification.destination}, updating notification user state...");
           await _updateNotificationUserStateUseCase(
             request: NotificationUserStateRequest(
               notificationUserId: notification.notificationUserId,
@@ -73,7 +72,8 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
             ),
           );
           emit(SendSmsSuccess(
-            responseMessage: "Sent to ${notification.destination}",
+            responseMessage:
+                "Sent to ${notification.destination} successfully, updated notification user state.",
           ));
         } else {
           emit(SendSmsFailure(errorMessage: result.toString()));
@@ -94,8 +94,6 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
       emit(SendSmsFailure(errorMessage: "SMS Permission Denied"));
       return;
     }
-    debugPrint(
-        "MANUAL SENDING: phone: ${event.phoneNumber}, message: ${event.message}");
     emit(SendSmsLoading());
     try {
       try {
