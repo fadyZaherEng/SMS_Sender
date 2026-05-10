@@ -28,16 +28,26 @@ class MainActivity : FlutterActivity() {
                     }
 
                     try {
-                        val smsManager: SmsManager =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                applicationContext.getSystemService(SmsManager::class.java)
+                        val smsManager: SmsManager? =
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                applicationContext.getSystemService(SmsManager::class.java) ?: SmsManager.getDefault()
                             } else {
                                 @Suppress("DEPRECATION")
                                 SmsManager.getDefault()
                             }
 
+                        if (smsManager == null) {
+                            result.error("ERR_SMS", "SmsManager is not available", null)
+                            return@setMethodCallHandler
+                        }
+
                         // 🔥 تقسيم الرسالة بشكل آمن
                         val parts = smsManager.divideMessage(message)
+
+                        if (parts == null || parts.isEmpty()) {
+                            result.error("ERR_SMS", "Failed to divide message", null)
+                            return@setMethodCallHandler
+                        }
 
                         android.util.Log.d("SMS_DEBUG", "Message length: ${message.length}")
                         android.util.Log.d("SMS_DEBUG", "Parts count: ${parts.size}")
@@ -67,7 +77,9 @@ class MainActivity : FlutterActivity() {
                         result.success("SMS Sent Successfully")
 
                     } catch (e: Exception) {
-                        result.error("ERR_SMS", e.message, null)
+                        val trace = android.util.Log.getStackTraceString(e)
+                        android.util.Log.e("SMS_DEBUG", "Crash: $trace")
+                        result.error("ERR_SMS", "${e.javaClass.simpleName}: ${e.message}", trace)
                     }
 
                 } else {

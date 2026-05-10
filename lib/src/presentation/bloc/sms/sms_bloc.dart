@@ -55,15 +55,15 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
           'sendSms',
           {
             'phone': notification.destination,
-            'message': notification.body,
-            // "Verification Code: ${notification
-            //     .body} .This Code Is Valid For 10 Minutes . Please do not share it with anyone",
+            'message': //notification.body,
+            "Verification Code: ${notification
+                .body} .This Code Is Valid For 10 Minutes . Please do not share it with anyone",
           },
         ).timeout(
-          const Duration(seconds: 60),
+          const Duration(seconds: 60)
         );
 
-        if (result == "SMS Sent Successfully") {
+        // if (result == "SMS Sent Successfully") {
           await _updateNotificationUserStateUseCase(
             request: NotificationUserStateRequest(
               notificationUserId: notification.notificationUserId,
@@ -73,15 +73,15 @@ class SmsBloc extends Bloc<SmsEvent, SmsState> {
           emit(SendSmsSuccess(
             responseMessage: "Sent to ${notification.destination}",
           ));
-        } else {
-          emit(SendSmsFailure(errorMessage: result.toString()));
-        }
+        // } else {
+        //   emit(SendSmsFailure(errorMessage: result.toString()));
+        // }
       } catch (e) {
         emit(SendSmsFailure(
           errorMessage: "Failed: ${e.toString()}",
         ));
       }
-      await Future.delayed(const Duration(seconds: 3));
+      await Future.delayed(const Duration(seconds: 2));
     }
   }
 
