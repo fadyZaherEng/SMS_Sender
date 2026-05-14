@@ -29,9 +29,9 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
   void initState() {
     super.initState();
     _fetchNotifications();
-    _fetchTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
-      _fetchNotifications();
-    });
+    // _fetchTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+    //   _fetchNotifications();
+    // });
   }
 
   void _fetchNotifications() {
@@ -249,6 +249,7 @@ class _SmsSenderScreenState extends BaseState<SmsSenderScreen> {
                       return;
                     }
 
+                    await Permission.notification.request();
                     final status = await Permission.sms.request();
                     if (!status.isGranted) {
                       _showError(

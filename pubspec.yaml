@@ -50,6 +50,11 @@ dependencies:
   loading_animation_widget:
   json_serializable:
   json_annotation:
+  flutter_background_service: ^5.1.0
+  flutter_local_notifications: ^18.0.1
+  device_info_plus: ^10.1.2
+  package_info_plus: ^8.0.2
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:

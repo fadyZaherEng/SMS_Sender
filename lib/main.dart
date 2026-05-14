@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sms_sender/src/di/injector.dart';
 import 'package:sms_sender/src/presentation/bloc/sms/sms_bloc.dart';
 import 'package:sms_sender/src/presentation/screens/sms/sms_screen.dart';
+import 'package:sms_sender/src/core/utils/background_service_utils.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -15,8 +16,9 @@ void main() async {
   ChuckerFlutter.showOnRelease = true;
   try {
     await initializeDependencies();
+    await BackgroundServiceUtils.initializeService();
   } catch (e) {
-    debugPrint("initializeDependencies failed: $e");
+    debugPrint("Initialization failed: $e");
   }
 
   await SystemChrome.setPreferredOrientations([
